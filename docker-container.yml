@@ -1,0 +1,33 @@
+- hosts: localhost
+  vars_prompt:
+       - name: container_name
+         prompt: "Enter the name of docker container:"
+
+  tasks:
+       - name: start service of docker
+         service:
+              name: docker
+       - name: "Pulling httpd image"
+         docker_image:
+              name: "httpd"
+              source: pull
+       - name: "Launching container"
+         docker_container:
+              name: "{{ container_name }}"
+              image: "httpd"
+              state: started
+              volumes: "/var/www/html/:/usr/local/apache2/htdocs"
+       - name: docker container info
+         docker_container_info:
+             name: "{{container_name }}"
+         register: result
+
+       - debug:
+              var : result.container.NetworkSettings.IPAddress
+
+       - name: Updating inventory file
+         blockinfile:
+              block: |
+                     [dockerip]
+                     {{  result.container.NetworkSettings.IPAddress }} ansible__user=root ansible_connection=ssh
+              path: "/root/ip.txt"
