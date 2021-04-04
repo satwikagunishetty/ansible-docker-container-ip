@@ -16,6 +16,7 @@
               name: "{{ container_name }}"
               image: "httpd"
               state: started
+              ports: 8057:80
               volumes: "/var/www/html/:/usr/local/apache2/htdocs"
        - name: docker container info
          docker_container_info:
